@@ -1,0 +1,48 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Build client
+        run: |
+          cd client
+          npm ci
+          npm run build
+
+      - name: Deploy to EC2
+        env:
+          SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "$SSH_KEY" > key.pem && chmod 600 key.pem
+
+          # Upload fresh client build
+          rsync -az --delete \
+            -e "ssh -i key.pem -o StrictHostKeyChecking=no" \
+            client/dist/ $USER@$HOST:/app/client/dist/
+
+          # Pull latest server code, install deps, reload
+          ssh -i key.pem -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+            set -e
+            cd /app
+            git pull origin main
+            cd server && npm ci --omit=dev
+            pm2 reload chain-tracker --update-env
+          EOF
+
+          rm key.pem

@@ -10,7 +10,7 @@ export default function WarlordWeapons({ apiKey, sendMessage, weapons }) {
     setError(null);
     try {
       const res = await fetch(
-        `https://api.torn.com/v2/faction/?selections=armory&key=${encodeURIComponent(apiKey)}`
+        `https://api.torn.com/v2/faction/armory/weapons?key=${encodeURIComponent(apiKey)}`
       );
       const data = await res.json();
       if (data.error) {

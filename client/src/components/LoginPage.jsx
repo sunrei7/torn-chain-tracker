@@ -64,7 +64,7 @@ export default function LoginPage({ onLogin }) {
       <form className="login-form" onSubmit={handleSubmit}>
         <a
           className="btn btn-generate"
-          href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=ChainTracker&user=basic,bars,profile&faction=chain,armory"
+          href="https://www.torn.com/preferences.php#tab=api?step=addNewKey&title=ChainTracker&user=basic,bars,profile&faction=weapons"
           target="_blank"
           rel="noopener noreferrer"
         >

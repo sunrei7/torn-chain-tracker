@@ -41,6 +41,11 @@ export default function ChainStatus({ apiKey, sendMessage, connected }) {
   const intervalRef = useRef(null);
   const audioCtxRef = useRef(null);
   const beepIntervalRef = useRef(null);
+  const connectedRef = useRef(connected);
+  const sendMessageRef = useRef(sendMessage);
+
+  useEffect(() => { connectedRef.current = connected; }, [connected]);
+  useEffect(() => { sendMessageRef.current = sendMessage; }, [sendMessage]);
 
   const fetchBars = useCallback(async () => {
     if (!apiKey) return;
@@ -61,13 +66,13 @@ export default function ChainStatus({ apiKey, sendMessage, connected }) {
       setCountdown(chainData.end > 0 ? Math.max(0, chainData.end - nowSec) : 0);
       setCooldownCountdown(chainData.cooldown ?? 0);
 
-      if (connected && energyData.current != null) {
-        sendMessage({ type: 'energy', current: energyData.current, max: energyData.maximum });
+      if (connectedRef.current && energyData.current != null) {
+        sendMessageRef.current({ type: 'energy', current: energyData.current, max: energyData.maximum });
       }
     } catch {
       // ignore
     }
-  }, [apiKey, connected, sendMessage]);
+  }, [apiKey]);
 
   // Poll bars data (chain + energy)
   useEffect(() => {
@@ -75,6 +80,11 @@ export default function ChainStatus({ apiKey, sendMessage, connected }) {
     const id = setInterval(fetchBars, POLL_INTERVAL);
     return () => clearInterval(id);
   }, [fetchBars]);
+
+  // Re-send energy immediately when WS connects so it shows without waiting for next poll
+  useEffect(() => {
+    if (connected) fetchBars();
+  }, [connected, fetchBars]);
 
   // Tick the countdown every second
   useEffect(() => {

@@ -30,7 +30,7 @@ function playBeep(audioCtx) {
   osc.stop(audioCtx.currentTime + 0.08);
 }
 
-export default function ChainStatus({ sessionToken }) {
+export default function ChainStatus({ apiKey, sendMessage, connected }) {
   const [chain, setChain] = useState(null);
   const [countdown, setCountdown] = useState(0);
   const [cooldownCountdown, setCooldownCountdown] = useState(0);
@@ -42,29 +42,39 @@ export default function ChainStatus({ sessionToken }) {
   const audioCtxRef = useRef(null);
   const beepIntervalRef = useRef(null);
 
-  const fetchChain = useCallback(async () => {
+  const fetchBars = useCallback(async () => {
+    if (!apiKey) return;
     try {
-      const res = await fetch('/api/chain', {
-        headers: { Authorization: `Bearer ${sessionToken}` },
-      });
+      const res = await fetch(
+        `https://api.torn.com/v2/user/?selections=bars&key=${encodeURIComponent(apiKey)}`
+      );
       if (!res.ok) return;
       const data = await res.json();
+      if (data.error) return;
+
+      const chainData = data.bars?.chain ?? {};
+      const energyData = data.bars?.energy ?? {};
+
       const fetchedAt = Date.now();
-      setChain({ ...data, _fetchedAt: fetchedAt });
+      setChain({ ...chainData, _fetchedAt: fetchedAt });
       const nowSec = Math.floor(fetchedAt / 1000);
-      setCountdown(data.end > 0 ? Math.max(0, data.end - nowSec) : 0);
-      setCooldownCountdown(data.cooldown);
+      setCountdown(chainData.end > 0 ? Math.max(0, chainData.end - nowSec) : 0);
+      setCooldownCountdown(chainData.cooldown ?? 0);
+
+      if (connected && energyData.current != null) {
+        sendMessage({ type: 'energy', current: energyData.current, max: energyData.maximum });
+      }
     } catch {
       // ignore
     }
-  }, [sessionToken]);
+  }, [apiKey, connected, sendMessage]);
 
-  // Poll chain data
+  // Poll bars data (chain + energy)
   useEffect(() => {
-    fetchChain();
-    const id = setInterval(fetchChain, POLL_INTERVAL);
+    fetchBars();
+    const id = setInterval(fetchBars, POLL_INTERVAL);
     return () => clearInterval(id);
-  }, [fetchChain]);
+  }, [fetchBars]);
 
   // Tick the countdown every second
   useEffect(() => {

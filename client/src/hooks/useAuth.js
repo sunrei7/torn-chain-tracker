@@ -5,6 +5,7 @@ const STORAGE_KEY = 'chain-tracker-auth';
 export function useAuth() {
   const [sessionToken, setSessionToken] = useState(null);
   const [user, setUser] = useState(null);
+  const [apiKey, setApiKey] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // On mount, restore from localStorage and validate
@@ -23,6 +24,7 @@ export function useAuth() {
         if (res.ok) {
           setSessionToken(parsed.sessionToken);
           setUser(parsed.user);
+          setApiKey(parsed.apiKey);
         } else {
           localStorage.removeItem(STORAGE_KEY);
         }
@@ -48,12 +50,14 @@ export function useAuth() {
     }
     setSessionToken(data.sessionToken);
     setUser(data.user);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    setApiKey(apiKey);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, apiKey }));
   }, []);
 
   const logout = useCallback(() => {
     setSessionToken(null);
     setUser(null);
+    setApiKey(null);
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
@@ -62,5 +66,5 @@ export function useAuth() {
     return { Authorization: `Bearer ${sessionToken}` };
   }, [sessionToken]);
 
-  return { sessionToken, user, loading, login, logout, authHeaders };
+  return { sessionToken, user, apiKey, loading, login, logout, authHeaders };
 }

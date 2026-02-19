@@ -18,7 +18,7 @@ function generateUpcomingSlots() {
   return slots;
 }
 
-export default function HomePage({ user, sessionToken, onLogout }) {
+export default function HomePage({ user, sessionToken, apiKey, onLogout }) {
   const [watcher, setWatcher] = useState(null);
   const [now, setNow] = useState(Date.now());
   const { slots, eyeStates, connected, fetchSchedule, addSignups, removeSignups, sendMessage, setOnReconnect } =
@@ -47,27 +47,6 @@ export default function HomePage({ user, sessionToken, onLogout }) {
     fetchSchedule(from, last.toISOString());
   }, [timeSlots, fetchSchedule]);
 
-  // Fetch own energy every 30s while connected and send via WS
-  useEffect(() => {
-    if (!connected) return;
-
-    async function fetchAndSendEnergy() {
-      try {
-        const res = await fetch('/api/energy', {
-          headers: { Authorization: `Bearer ${sessionToken}` },
-        });
-        if (!res.ok) return;
-        const { current, max } = await res.json();
-        sendMessage({ type: 'energy', current, max });
-      } catch {
-        // ignore
-      }
-    }
-
-    fetchAndSendEnergy();
-    const id = setInterval(fetchAndSendEnergy, 30_000);
-    return () => clearInterval(id);
-  }, [connected, sessionToken, sendMessage]);
 
   // Tick for past-slot detection
   useEffect(() => {
@@ -89,7 +68,7 @@ export default function HomePage({ user, sessionToken, onLogout }) {
       </header>
       <div className="home-content">
         <div className="home-dashboard">
-          <ChainStatus sessionToken={sessionToken} />
+          <ChainStatus apiKey={apiKey} sendMessage={sendMessage} connected={connected} />
           <WatchEye sendMessage={sendMessage} setOnReconnect={setOnReconnect} />
           <OnlineUsers eyeStates={eyeStates} />
         </div>

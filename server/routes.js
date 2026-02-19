@@ -11,7 +11,6 @@ import {
   getUserByTornId,
   updateUserApiKey,
   getUserBySession,
-  getApiKeyBySession,
   countUsers,
 } from './db.js';
 
@@ -114,61 +113,6 @@ export function createRoutes(broadcast) {
       }
     }
     res.json({ totalUsers: countUsers(), onlineUsers: onlineCount });
-  });
-
-  router.get('/api/energy', authMiddleware, async (req, res) => {
-    const token = req.headers.authorization.slice(7);
-    const apiKey = getApiKeyBySession(token);
-    if (!apiKey) {
-      return res.status(500).json({ error: 'API key not found' });
-    }
-
-    let data;
-    try {
-      const resp = await fetch(
-        `https://api.torn.com/v2/user/?selections=bars&key=${encodeURIComponent(apiKey)}`
-      );
-      data = await resp.json();
-    } catch {
-      return res.status(502).json({ error: 'Failed to reach Torn API' });
-    }
-
-    if (data.error) {
-      return res.status(400).json({ error: `Torn API error: ${data.error.error}` });
-    }
-
-    const energy = data.energy || {};
-    res.json({ current: energy.current ?? 0, max: energy.maximum ?? 0 });
-  });
-
-  router.get('/api/chain', authMiddleware, async (req, res) => {
-    const token = req.headers.authorization.slice(7);
-    const apiKey = getApiKeyBySession(token);
-    if (!apiKey) {
-      return res.status(500).json({ error: 'API key not found' });
-    }
-
-    let data;
-    try {
-      const resp = await fetch(
-        `https://api.torn.com/v2/faction/?selections=chain&key=${encodeURIComponent(apiKey)}`
-      );
-      data = await resp.json();
-    } catch {
-      return res.status(502).json({ error: 'Failed to reach Torn API' });
-    }
-
-    if (data.error) {
-      return res.status(400).json({ error: `Torn API error: ${data.error.error}` });
-    }
-
-    const chain = data.chain || {};
-    res.json({
-      current: chain.current || 0,
-      max: chain.max || 0,
-      end: chain.end || 0,
-      cooldown: chain.cooldown || 0,
-    });
   });
 
   router.get('/api/watchers', authMiddleware, (_req, res) => {

@@ -9,7 +9,7 @@ function getHash() {
 }
 
 export default function App() {
-  const { sessionToken, user, loading, login, logout } = useAuth();
+  const { sessionToken, user, apiKey, loading, login, logout } = useAuth();
   const [hash, setHash] = useState(getHash);
 
   useEffect(() => {
@@ -48,5 +48,5 @@ export default function App() {
   }
 
   // Default: home
-  return <HomePage user={user} sessionToken={sessionToken} onLogout={handleLogout} />;
+  return <HomePage user={user} sessionToken={sessionToken} apiKey={apiKey} onLogout={handleLogout} />;
 }

@@ -72,8 +72,8 @@ export function createRoutes(broadcast) {
       return res.status(403).json({ error: 'Please join a faction in order to use this tool' });
     }
 
-    const tornId = tornData.player_id;
-    const username = tornData.name;
+    const tornId = tornData.profile.id;
+    const username = tornData.profile.name;
     const factionId = tornData.profile.faction_id;
     const sessionToken = crypto.randomUUID();
 

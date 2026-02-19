@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/sunrei7/torn-chain-tracker/compare/chain-tracker-client-v1.1.0...chain-tracker-client-v1.1.1) (2026-02-19)
+
+
+### Bug Fixes
+
+* activate AudioContext on first user gesture after page refresh ([20cc149](https://github.com/sunrei7/torn-chain-tracker/commit/20cc14963a77309513c2b0de0a737483efcb5a71))
+
 ## [1.1.0](https://github.com/sunrei7/torn-chain-tracker/compare/chain-tracker-client-v1.0.0...chain-tracker-client-v1.1.0) (2026-02-19)
 
 

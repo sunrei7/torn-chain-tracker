@@ -1,0 +1,8 @@
+{
+  "packages": {
+    "client": {
+      "release-type": "node",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}

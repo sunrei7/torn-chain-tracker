@@ -57,7 +57,7 @@ export function createRoutes(broadcast) {
     let tornData;
     try {
       const resp = await fetch(
-        `https://api.torn.com/user/?selections=basic&key=${encodeURIComponent(apiKey)}`
+        `https://api.torn.com/v2/user/?selections=basic,profile&key=${encodeURIComponent(apiKey)}`
       );
       tornData = await resp.json();
     } catch {
@@ -127,7 +127,7 @@ export function createRoutes(broadcast) {
     let data;
     try {
       const resp = await fetch(
-        `https://api.torn.com/user/?selections=bars&key=${encodeURIComponent(apiKey)}`
+        `https://api.torn.com/v2/user/?selections=bars&key=${encodeURIComponent(apiKey)}`
       );
       data = await resp.json();
     } catch {
@@ -152,7 +152,7 @@ export function createRoutes(broadcast) {
     let data;
     try {
       const resp = await fetch(
-        `https://api.torn.com/faction/?selections=chain&key=${encodeURIComponent(apiKey)}`
+        `https://api.torn.com/v2/faction/?selections=chain&key=${encodeURIComponent(apiKey)}`
       );
       data = await resp.json();
     } catch {

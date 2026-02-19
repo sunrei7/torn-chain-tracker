@@ -22,7 +22,7 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 // Eye states for all connected authenticated users: userId -> { state, username }
 const eyeStates = new Map();
 
-function broadcastSchedule() {
+function broadcastSchedule(factionId) {
   const now = new Date();
   const from = new Date(now);
   from.setHours(0, 0, 0, 0);
@@ -33,24 +33,26 @@ function broadcastSchedule() {
   const message = JSON.stringify({ type: 'schedule', data: { slots } });
 
   for (const client of wss.clients) {
-    if (client.readyState === 1) {
+    if (client.readyState === 1 && client._factionId === factionId) {
       client.send(message);
     }
   }
 }
 
-function buildEyeStatesPayload() {
+function buildEyeStatesPayload(factionId) {
   const states = {};
   for (const [userId, data] of eyeStates) {
-    states[userId] = { state: data.state, username: data.username, energy: data.energy ?? null };
+    if (data.factionId === factionId) {
+      states[userId] = { state: data.state, username: data.username, energy: data.energy ?? null };
+    }
   }
   return states;
 }
 
-function broadcastEyeStates() {
-  const message = JSON.stringify({ type: 'eye_states', data: buildEyeStatesPayload() });
+function broadcastEyeStates(factionId) {
+  const message = JSON.stringify({ type: 'eye_states', data: buildEyeStatesPayload(factionId) });
   for (const client of wss.clients) {
-    if (client.readyState === 1) {
+    if (client.readyState === 1 && client._factionId === factionId) {
       client.send(message);
     }
   }
@@ -72,13 +74,14 @@ wss.on('connection', (ws, req) => {
   // Attach user to ws for cleanup
   ws._userId = wsUser?.id ?? null;
   ws._username = wsUser?.username ?? null;
+  ws._factionId = wsUser?.faction_id ?? null;
 
   // Register authenticated user as online (default: not_watching)
   if (ws._userId) {
-    eyeStates.set(ws._userId, { state: 'not_watching', username: ws._username });
+    eyeStates.set(ws._userId, { state: 'not_watching', username: ws._username, factionId: ws._factionId });
   }
 
-  // Send current schedule on connect
+  // Send current schedule on connect (faction-scoped data is handled client-side via watchers)
   const now = new Date();
   const from = new Date(now);
   from.setHours(0, 0, 0, 0);
@@ -88,12 +91,12 @@ wss.on('connection', (ws, req) => {
   const slots = getSchedule(from.toISOString(), to.toISOString());
   ws.send(JSON.stringify({ type: 'schedule', data: { slots } }));
 
-  // Send current eye states on connect
-  ws.send(JSON.stringify({ type: 'eye_states', data: buildEyeStatesPayload() }));
+  // Send current eye states on connect (filtered to this user's faction)
+  ws.send(JSON.stringify({ type: 'eye_states', data: buildEyeStatesPayload(ws._factionId) }));
 
-  // Broadcast updated online list to everyone
+  // Broadcast updated online list to faction members
   if (ws._userId) {
-    broadcastEyeStates();
+    broadcastEyeStates(ws._factionId);
   }
 
   // Handle incoming messages
@@ -110,8 +113,8 @@ wss.on('connection', (ws, req) => {
       if (!['not_watching', 'watching', 'watching_idle'].includes(newState)) return;
 
       const prev = eyeStates.get(ws._userId) || {};
-      eyeStates.set(ws._userId, { state: newState, username: ws._username, energy: prev.energy ?? null });
-      broadcastEyeStates();
+      eyeStates.set(ws._userId, { state: newState, username: ws._username, factionId: ws._factionId, energy: prev.energy ?? null });
+      broadcastEyeStates(ws._factionId);
     }
 
     if (msg.type === 'energy' && ws._userId) {
@@ -120,15 +123,15 @@ wss.on('connection', (ws, req) => {
 
       const prev = eyeStates.get(ws._userId) || {};
       eyeStates.set(ws._userId, { ...prev, energy: { current, max } });
-      broadcastEyeStates();
+      broadcastEyeStates(ws._factionId);
     }
   });
 
-  // On disconnect, remove from online list and reset eye state
+  // On disconnect, remove from online list and notify faction
   ws.on('close', () => {
     if (ws._userId) {
       eyeStates.delete(ws._userId);
-      broadcastEyeStates();
+      broadcastEyeStates(ws._factionId);
     }
   });
 });

@@ -77,7 +77,7 @@ const stmts = {
 
   getUserByApiKey: db.prepare('SELECT * FROM users WHERE api_key = ?'),
 
-  getUserBySession: db.prepare('SELECT id, torn_id, username, is_admin FROM users WHERE session_token = ?'),
+  getUserBySession: db.prepare('SELECT id, torn_id, username, is_admin, faction_id FROM users WHERE session_token = ?'),
 
   getApiKeyBySession: db.prepare('SELECT api_key FROM users WHERE session_token = ?'),
 

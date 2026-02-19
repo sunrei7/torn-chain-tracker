@@ -211,7 +211,7 @@ export function createRoutes(broadcast) {
       return res.status(400).json({ error: 'Cannot sign up for past time slots' });
     }
     addSignups(watcherId, slots);
-    broadcast();
+    broadcast(req.user.faction_id);
     res.json({ ok: true });
   });
 
@@ -221,7 +221,7 @@ export function createRoutes(broadcast) {
       return res.status(400).json({ error: 'watcherId and slots[] required' });
     }
     removeSignups(watcherId, slots);
-    broadcast();
+    broadcast(req.user.faction_id);
     res.json({ ok: true });
   });
 

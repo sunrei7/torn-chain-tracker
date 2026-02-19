@@ -4,6 +4,7 @@ import SlotRow from './SlotRow.jsx';
 import WatchEye from './WatchEye.jsx';
 import ChainStatus from './ChainStatus.jsx';
 import OnlineUsers from './OnlineUsers.jsx';
+import WarlordWeapons from './WarlordWeapons.jsx';
 
 function generateUpcomingSlots() {
   const slots = [];
@@ -21,7 +22,7 @@ function generateUpcomingSlots() {
 export default function HomePage({ user, sessionToken, apiKey, onLogout }) {
   const [watcher, setWatcher] = useState(null);
   const [now, setNow] = useState(Date.now());
-  const { slots, eyeStates, connected, fetchSchedule, addSignups, removeSignups, sendMessage, setOnReconnect } =
+  const { slots, eyeStates, warlordWeapons, connected, fetchSchedule, addSignups, removeSignups, sendMessage, setOnReconnect } =
     useSchedule(sessionToken);
 
   const timeSlots = useMemo(() => generateUpcomingSlots(), []);
@@ -72,6 +73,8 @@ export default function HomePage({ user, sessionToken, apiKey, onLogout }) {
           <WatchEye sendMessage={sendMessage} setOnReconnect={setOnReconnect} />
           <OnlineUsers eyeStates={eyeStates} />
         </div>
+
+        <WarlordWeapons apiKey={apiKey} sendMessage={sendMessage} weapons={warlordWeapons} />
 
         <div className="home-timeline">
           <h3>Next 2 hours</h3>

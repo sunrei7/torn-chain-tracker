@@ -22,6 +22,9 @@ const wss = new WebSocketServer({ server, path: '/ws' });
 // Eye states for all connected authenticated users: userId -> { state, username }
 const eyeStates = new Map();
 
+// Latest warlord weapons per faction: factionId -> weapons array
+const factionWarlordWeapons = new Map();
+
 function broadcastSchedule(factionId) {
   const now = new Date();
   const from = new Date(now);
@@ -94,6 +97,11 @@ wss.on('connection', (ws, req) => {
   // Send current eye states on connect (filtered to this user's faction)
   ws.send(JSON.stringify({ type: 'eye_states', data: buildEyeStatesPayload(ws._factionId) }));
 
+  // Send latest warlord weapons if available for this faction
+  if (ws._factionId && factionWarlordWeapons.has(ws._factionId)) {
+    ws.send(JSON.stringify({ type: 'warlord_weapons', data: factionWarlordWeapons.get(ws._factionId) }));
+  }
+
   // Broadcast updated online list to faction members
   if (ws._userId) {
     broadcastEyeStates(ws._factionId);
@@ -124,6 +132,17 @@ wss.on('connection', (ws, req) => {
       const prev = eyeStates.get(ws._userId) || {};
       eyeStates.set(ws._userId, { ...prev, energy: { current, max } });
       broadcastEyeStates(ws._factionId);
+    }
+
+    if (msg.type === 'warlord_weapons' && ws._factionId) {
+      if (!Array.isArray(msg.data)) return;
+      factionWarlordWeapons.set(ws._factionId, msg.data);
+      const broadcast = JSON.stringify({ type: 'warlord_weapons', data: msg.data });
+      for (const client of wss.clients) {
+        if (client.readyState === 1 && client._factionId === ws._factionId) {
+          client.send(broadcast);
+        }
+      }
     }
   });
 

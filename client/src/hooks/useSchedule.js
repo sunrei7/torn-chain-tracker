@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 export function useSchedule(sessionToken) {
   const [slots, setSlots] = useState({});
   const [eyeStates, setEyeStates] = useState({});
+  const [warlordWeapons, setWarlordWeapons] = useState(null);
   const [connected, setConnected] = useState(false);
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
@@ -26,6 +27,8 @@ export function useSchedule(sessionToken) {
         setSlots(msg.data.slots);
       } else if (msg.type === 'eye_states') {
         setEyeStates(msg.data);
+      } else if (msg.type === 'warlord_weapons') {
+        setWarlordWeapons(msg.data);
       }
     };
 
@@ -87,7 +90,7 @@ export function useSchedule(sessionToken) {
   }, []);
 
   return {
-    slots, eyeStates, connected,
+    slots, eyeStates, warlordWeapons, connected,
     fetchSchedule, addSignups, removeSignups,
     sendMessage, setOnReconnect,
   };

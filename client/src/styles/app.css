@@ -545,6 +545,88 @@ button:disabled {
   color: #667;
 }
 
+/* Warlord Weapons */
+.warlord-weapons {
+  margin-bottom: 2rem;
+  background: #16213e;
+  border: 1px solid #334;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: left;
+}
+
+.warlord-weapons__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.warlord-weapons__title {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #889;
+}
+
+.warlord-weapons__refresh {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+}
+
+.warlord-weapons__empty {
+  font-size: 0.85rem;
+  color: #556;
+  text-align: center;
+  padding: 0.5rem 0;
+}
+
+.warlord-weapons__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.warlord-weapons__table th {
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #667;
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid #223;
+}
+
+.warlord-weapons__table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid #1a2035;
+  color: #ccd;
+  vertical-align: middle;
+}
+
+.warlord-weapons__table tr:last-child td {
+  border-bottom: none;
+}
+
+.warlord-weapons__img-cell {
+  width: 40px;
+}
+
+.warlord-weapons__img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.warlord-weapons__value {
+  font-weight: 700;
+  color: #facc15;
+  white-space: nowrap;
+}
+
 .home-timeline {
   margin-bottom: 2rem;
   text-align: left;

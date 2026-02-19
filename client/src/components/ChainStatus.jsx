@@ -100,11 +100,11 @@ export default function ChainStatus({ sessionToken }) {
     });
   }, []);
 
-  // Compute beep tier — only changes at threshold boundaries (120, 60, 30)
-  // 0 = silent, 1 = 1/s, 2 = 2/s (every 500ms), 3 = 3/s (every 333ms)
+  // Compute beep tier — only changes at threshold boundaries (90, 60, 30)
+  // 0 = silent, 1 = 1/1.5s (every 1500ms), 2 = 2/s (every 500ms), 3 = 4/s (every 250ms)
   const isActiveForBeep = chain !== null && chain.current > 0 && chain.end > 0 && chain.cooldown === 0;
   let beepTier = 0;
-  if (isActiveForBeep && soundEnabled && countdown > 0 && countdown <= 120) {
+  if (isActiveForBeep && soundEnabled && countdown > 0 && countdown <= 90) {
     if (countdown > 60) beepTier = 1;
     else if (countdown > 30) beepTier = 2;
     else beepTier = 3;
@@ -127,7 +127,7 @@ export default function ChainStatus({ sessionToken }) {
       audioCtxRef.current.resume();
     }
 
-    const intervalMs = beepTier === 1 ? 1000 : beepTier === 2 ? 500 : 333;
+    const intervalMs = beepTier === 1 ? 1500 : beepTier === 2 ? 500 : 250;
 
     playBeep(audioCtxRef.current);
     beepIntervalRef.current = setInterval(() => {

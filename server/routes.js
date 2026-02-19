@@ -68,6 +68,10 @@ export function createRoutes(broadcast) {
       return res.status(400).json({ error: `Torn API error: ${tornData.error.error}` });
     }
 
+    if (!tornData.faction || tornData.faction.faction_id === 0) {
+      return res.status(403).json({ error: 'Please join a faction in order to use this tool' });
+    }
+
     const tornId = tornData.player_id;
     const username = tornData.name;
     const sessionToken = crypto.randomUUID();

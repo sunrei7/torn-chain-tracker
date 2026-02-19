@@ -43,7 +43,6 @@ db.exec(`
 const migrations = [
   'ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0',
   'ALTER TABLE users ADD COLUMN faction_id INTEGER',
-  'ALTER TABLE users ADD COLUMN faction_name TEXT',
 ];
 for (const sql of migrations) {
   try { db.exec(sql); } catch { /* column already exists */ }
@@ -72,7 +71,7 @@ const stmts = {
   `),
 
   createUser: db.prepare(
-    'INSERT INTO users (torn_id, username, api_key, session_token, faction_id, faction_name) VALUES (?, ?, ?, ?, ?, ?)'
+    'INSERT INTO users (torn_id, username, api_key, session_token, faction_id) VALUES (?, ?, ?, ?, ?)'
   ),
 
   getUserByApiKey: db.prepare('SELECT * FROM users WHERE api_key = ?'),
@@ -86,7 +85,7 @@ const stmts = {
   getUserByTornId: db.prepare('SELECT * FROM users WHERE torn_id = ?'),
 
   updateUserApiKey: db.prepare(
-    'UPDATE users SET api_key = ?, username = ?, session_token = ?, faction_id = ?, faction_name = ? WHERE torn_id = ? RETURNING *'
+    'UPDATE users SET api_key = ?, username = ?, session_token = ?, faction_id = ? WHERE torn_id = ? RETURNING *'
   ),
 };
 
@@ -117,8 +116,8 @@ export function removeSignups(watcherId, slots) {
   tx(slots);
 }
 
-export function createUser(tornId, username, apiKey, sessionToken, factionId, factionName) {
-  const info = stmts.createUser.run(tornId, username, apiKey, sessionToken, factionId, factionName);
+export function createUser(tornId, username, apiKey, sessionToken, factionId) {
+  const info = stmts.createUser.run(tornId, username, apiKey, sessionToken, factionId);
   return { id: info.lastInsertRowid, tornId, username };
 }
 
@@ -130,8 +129,8 @@ export function getUserByTornId(tornId) {
   return stmts.getUserByTornId.get(tornId);
 }
 
-export function updateUserApiKey(tornId, username, apiKey, sessionToken, factionId, factionName) {
-  return stmts.updateUserApiKey.get(apiKey, username, sessionToken, factionId, factionName, tornId);
+export function updateUserApiKey(tornId, username, apiKey, sessionToken, factionId) {
+  return stmts.updateUserApiKey.get(apiKey, username, sessionToken, factionId, tornId);
 }
 
 export function getUserBySession(sessionToken) {

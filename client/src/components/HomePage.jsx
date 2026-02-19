@@ -74,9 +74,9 @@ export default function HomePage({ user, sessionToken, apiKey, onLogout }) {
           <OnlineUsers eyeStates={eyeStates} />
         </div>
 
-        <WarlordWeapons apiKey={apiKey} sendMessage={sendMessage} weapons={warlordWeapons} />
+        {/* <WarlordWeapons apiKey={apiKey} sendMessage={sendMessage} weapons={warlordWeapons} /> */}
 
-        <div className="home-timeline">
+<div className="home-timeline">
           <h3>Next 2 hours</h3>
           <div className="timeline">
             <div className="slot-row header">

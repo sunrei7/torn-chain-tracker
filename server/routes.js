@@ -74,12 +74,14 @@ export function createRoutes(broadcast) {
 
     const tornId = tornData.player_id;
     const username = tornData.name;
+    const factionId = tornData.faction.faction_id;
+    const factionName = tornData.faction.faction_name;
     const sessionToken = crypto.randomUUID();
 
     // Check if this Torn account already exists (different API key)
     const existingByTornId = getUserByTornId(tornId);
     if (existingByTornId) {
-      const updated = updateUserApiKey(tornId, username, apiKey, sessionToken);
+      const updated = updateUserApiKey(tornId, username, apiKey, sessionToken, factionId, factionName);
       return res.json({
         sessionToken,
         user: { id: updated.id, tornId: updated.torn_id, username: updated.username, isAdmin: !!updated.is_admin },
@@ -87,7 +89,7 @@ export function createRoutes(broadcast) {
     }
 
     try {
-      const user = createUser(tornId, username, apiKey, sessionToken);
+      const user = createUser(tornId, username, apiKey, sessionToken, factionId, factionName);
       // Create a watcher with the same name as the user
       try {
         createWatcher(username);

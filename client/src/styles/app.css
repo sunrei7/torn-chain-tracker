@@ -411,6 +411,14 @@ button:disabled {
 .chain-status__sound-btn.active {
   color: #4ade80;
 }
+.chain-status__sound-btn.pending {
+  color: #facc15;
+  animation: sound-pending 1.2s ease-in-out infinite;
+}
+@keyframes sound-pending {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
 
 .chain-status__hits {
   font-size: 2rem;

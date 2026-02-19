@@ -37,6 +37,7 @@ export default function ChainStatus({ apiKey, sendMessage, connected }) {
   const [soundEnabled, setSoundEnabled] = useState(() => {
     try { return localStorage.getItem('chainSoundEnabled') === 'true'; } catch { return false; }
   });
+  const [audioReady, setAudioReady] = useState(false);
 
   const intervalRef = useRef(null);
   const audioCtxRef = useRef(null);
@@ -102,11 +103,30 @@ export default function ChainStatus({ apiKey, sendMessage, connected }) {
     return () => clearInterval(intervalRef.current);
   }, [chain]);
 
+  // When sound is pre-enabled after a page refresh, activate AudioContext on first user click
+  useEffect(() => {
+    if (!soundEnabled || audioReady) return;
+
+    function activate() {
+      if (!audioCtxRef.current) {
+        try {
+          audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
+        } catch { return; }
+      }
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+      setAudioReady(true);
+    }
+
+    document.addEventListener('click', activate, { once: true });
+    return () => document.removeEventListener('click', activate);
+  }, [soundEnabled, audioReady]);
+
   const toggleSound = useCallback(() => {
     setSoundEnabled(prev => {
       const next = !prev;
       try { localStorage.setItem('chainSoundEnabled', String(next)); } catch {}
-      // Initialize or resume AudioContext on user gesture
       if (next) {
         if (!audioCtxRef.current) {
           try {
@@ -115,6 +135,7 @@ export default function ChainStatus({ apiKey, sendMessage, connected }) {
         } else if (audioCtxRef.current.state === 'suspended') {
           audioCtxRef.current.resume();
         }
+        setAudioReady(true);
       }
       return next;
     });
@@ -164,9 +185,9 @@ export default function ChainStatus({ apiKey, sendMessage, connected }) {
 
   const SoundButton = (
     <button
-      className={`chain-status__sound-btn${soundEnabled ? ' active' : ''}`}
+      className={`chain-status__sound-btn${soundEnabled ? ' active' : ''}${soundEnabled && !audioReady ? ' pending' : ''}`}
       onClick={toggleSound}
-      title={soundEnabled ? 'Disable alarm sound' : 'Enable alarm sound'}
+      title={soundEnabled && !audioReady ? 'Click anywhere to activate sound' : soundEnabled ? 'Disable alarm sound' : 'Enable alarm sound'}
       aria-label={soundEnabled ? 'Disable alarm sound' : 'Enable alarm sound'}
     >
       {soundEnabled ? (

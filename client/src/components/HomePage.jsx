@@ -78,7 +78,7 @@ export default function HomePage({ user, sessionToken, onLogout }) {
   return (
     <div className="home-page">
       <header>
-        <h1>Chain Tracker</h1>
+        <h1>Chain Tracker <span className="app-version">v{__APP_VERSION__}</span></h1>
         <div className="header-right">
           <span className={`status ${connected ? 'online' : 'offline'}`}>
             {connected ? 'Live' : 'Reconnecting...'}
